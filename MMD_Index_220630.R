@@ -4,8 +4,7 @@
 #install.packages("aweek")
 #install.packages("zoo")
 #install.packages("rio")
-install.packages(dbplyr)
-
+#install.packages(dbplyr)
 
 ################################################################################
 
@@ -63,6 +62,393 @@ setwd("C:/ArcGIS/Projects/Dev_MMD/csv")
 # rm(list=ls())
 
 ################################################################################
+################################################################################
+
+# 0. Import the Excel spreadsheet
+
+mmd_ft_history1 <- read_excel("AEO_UWS_ColumbusAve-MMDResults-20220627170015.xlsx", sheet = "FT Historical Trends")
+mmd_ft_history2 <- read_excel("AEO_UWS_ColumbusCircle-MMDResults-20220627160037.xlsx", sheet = "FT Historical Trends")
+
+view(mmd_ft_history1)
+view(mmd_ft_history2)
+
+#####################################
+
+# 1. Data wrangling for month, day of week, and hour
+
+# A. MMD 1 site
+# 1) Month
+mmd_ft_history1_month <-
+  mmd_ft_history1 %>%
+  select(Date, Hour, Count) %>%
+  mutate(
+    date_onset = as.Date(Date),
+    year = year(date_onset),
+    month = month(date_onset),
+    day = mday(date_onset),
+    day.of.week = wday(date_onset, label = TRUE)
+  ) %>%
+  filter(
+    Date >= "2019-01-01" & Date <= "2019-12-31"
+  ) %>%
+  select(date_onset, year, month, day, day.of.week, Hour, Count) %>%
+  dplyr::rename(
+    hour = "Hour",
+    count = "Count"
+  ) %>%
+  group_by(month) %>%
+  summarise(m.count = sum(count)) %>%
+  mutate(
+    MMD = "MMD_1"
+  )
+
+# 2) Day of week
+mmd_ft_history1_day <-
+  mmd_ft_history1 %>%
+  select(Date, Hour, Count) %>%
+  mutate(
+    date_onset = as.Date(Date),
+    year = year(date_onset),
+    month = month(date_onset),
+    day = mday(date_onset),
+    day.of.week = wday(date_onset, label = TRUE)
+  ) %>%
+  filter(
+    Date >= "2019-01-01" & Date <= "2019-12-31"
+  ) %>%
+  select(date_onset, year, month, day, day.of.week, Hour, Count) %>%
+  dplyr::rename(
+    hour = "Hour",
+    count = "Count"
+  ) %>%
+  group_by(day.of.week) %>%
+  summarise(d.count = sum(count)) %>%
+  mutate(
+    MMD = "MMD_1"
+  )
+
+# 3) Hour
+mmd_ft_history1_hour <-
+  mmd_ft_history1 %>%
+  select(Date, Hour, Count) %>%
+  mutate(
+    date_onset = as.Date(Date),
+    year = year(date_onset),
+    month = month(date_onset),
+    day = mday(date_onset),
+    day.of.week = wday(date_onset, label = TRUE)
+  ) %>%
+  filter(
+    Date >= "2019-01-01" & Date <= "2019-12-31"
+  ) %>%
+  select(date_onset, year, month, day, day.of.week, Hour, Count) %>%
+  dplyr::rename(
+    hour = "Hour",
+    count = "Count"
+  ) %>%
+  group_by(hour) %>%
+  summarise(h.count = sum(count)) %>%
+  mutate(
+    MMD = "MMD_1"
+  )
+
+# B. MMD 2 site
+# 1) Month
+mmd_ft_history2_month <-
+  mmd_ft_history2 %>%
+  select(Date, Hour, Count) %>%
+  mutate(
+    date_onset = as.Date(Date),
+    year = year(date_onset),
+    month = month(date_onset),
+    day = mday(date_onset),
+    day.of.week = wday(date_onset, label = TRUE)
+  ) %>%
+  filter(
+    Date >= "2019-01-01" & Date <= "2019-12-31"
+  ) %>%
+  select(date_onset, year, month, day, day.of.week, Hour, Count) %>%
+  dplyr::rename(
+    hour = "Hour",
+    count = "Count"
+  ) %>%
+  group_by(month) %>%
+  summarise(m.count = sum(count)) %>%
+  mutate(
+    MMD = "MMD_2"
+  )
+
+#2) Day of week
+mmd_ft_history2_day <-
+  mmd_ft_history2 %>%
+  select(Date, Hour, Count) %>%
+  mutate(
+    date_onset = as.Date(Date),
+    year = year(date_onset),
+    month = month(date_onset),
+    day = mday(date_onset),
+    day.of.week = wday(date_onset, label = TRUE)
+  ) %>%
+  filter(
+    Date >= "2019-01-01" & Date <= "2019-12-31"
+  ) %>%
+  select(date_onset, year, month, day, day.of.week, Hour, Count) %>%
+  dplyr::rename(
+    hour = "Hour",
+    count = "Count"
+  ) %>%
+  group_by(day.of.week) %>%
+  summarise(d.count = sum(count)) %>%
+  mutate(
+    MMD = "MMD_2"
+  )
+
+# 3) Hour
+mmd_ft_history2_hour <-
+  mmd_ft_history2 %>%
+  select(Date, Hour, Count) %>%
+  mutate(
+    date_onset = as.Date(Date),
+    year = year(date_onset),
+    month = month(date_onset),
+    day = mday(date_onset),
+    day.of.week = wday(date_onset, label = TRUE)
+  ) %>%
+  filter(
+    Date >= "2019-01-01" & Date <= "2019-12-31"
+  ) %>%
+  select(date_onset, year, month, day, day.of.week, Hour, Count) %>%
+  dplyr::rename(
+    hour = "Hour",
+    count = "Count"
+  ) %>%
+  group_by(hour) %>%
+  summarise(h.count = sum(count)) %>%
+  mutate(
+    MMD = "MMD_2"
+  )
+
+# C. Combine two sites
+# 1) Month
+mmd_ft_history12_month <-
+  mmd_ft_history1_month %>%
+  rbind(mmd_ft_history2_month)
+
+# 2) Day of week
+mmd_ft_history12_day <-
+  mmd_ft_history1_day %>%
+  rbind(mmd_ft_history2_day)
+
+# 3) Hour
+mmd_ft_history12_hour <-
+  mmd_ft_history1_hour %>%
+  rbind(mmd_ft_history2_hour)
+
+view(mmd_ft_history12_month)
+view(mmd_ft_history12_day)
+view(mmd_ft_history12_hour)
+
+# Check the number is right
+#  The total sum is 901061
+mmd_ft_history12_month %>%
+  mutate(
+    sum_m.count = sum(m.count)
+  ) %>%
+  head(1)
+mmd_ft_history12_day %>%
+  mutate(
+    sum_d.count = sum(d.count)
+  ) %>%
+  head(1)
+mmd_ft_history12_hour %>%
+  mutate(
+    sum_h.count = sum(h.count)
+  ) %>%
+  head(1)
+
+# D. Create Final Score
+# 1) Month
+mmd_ft_history12_month_finalscore <-
+  mmd_ft_history12_month %>%
+  mutate(
+    mean_month = mean(m.count),
+    stdv_month = sd(m.count),
+    var1_weight = 1,
+    Var1_Z = (m.count-mean_month)/stdv_month,
+    Var1_cappped = if_else(Var1_Z > 3, 3, 
+                           if_else(Var1_Z < -3, -3, Var1_Z)),
+    com_z = var1_weight*Var1_cappped,
+    max_z = max(com_z),
+    demand_index = (1+(com_z/max_z))*100,
+    index_adj = mean(demand_index),
+    final_score_pre = demand_index/index_adj*100,
+    final_score = if_else(final_score_pre < 0, 0, final_score_pre)
+  ) %>%
+  select(
+    month, final_score, MMD
+  ) %>% 
+  mutate_if(is.numeric,
+            round,
+            digits = 1)
+
+# 2) Day of week
+mmd_ft_history12_day_finalscore <-
+  mmd_ft_history12_day %>%
+  mutate(
+    mean_day = mean(d.count),
+    stdv_day = sd(d.count),
+    var1_weight = 1,
+    Var1_Z = (d.count-mean_day)/stdv_day,
+    Var1_cappped = if_else(Var1_Z > 3, 3, 
+                           if_else(Var1_Z < -3, -3, Var1_Z)),
+    com_z = var1_weight*Var1_cappped,
+    max_z = max(com_z),
+    demand_index = (1+(com_z/max_z))*100,
+    index_adj = mean(demand_index),
+    final_score_pre = demand_index/index_adj*100,
+    final_score = if_else(final_score_pre < 0, 0, final_score_pre)
+  ) %>%
+  select(
+    day.of.week, final_score, MMD
+  ) %>% 
+  mutate_if(is.numeric,
+            round,
+            digits = 1)
+
+# 3) Hour
+mmd_ft_history12_hour_finalscore <-
+  mmd_ft_history12_hour %>%
+  mutate(
+    mean_hour = mean(h.count),
+    stdv_hour = sd(h.count),
+    var1_weight = 1,
+    Var1_Z = (h.count-mean_hour)/stdv_hour,
+    Var1_cappped = if_else(Var1_Z > 3, 3, 
+                           if_else(Var1_Z < -3, -3, Var1_Z)),
+    com_z = var1_weight*Var1_cappped,
+    max_z = max(com_z),
+    demand_index = (1+(com_z/max_z))*100,
+    index_adj = mean(demand_index),
+    final_score_pre = demand_index/index_adj*100,
+    final_score = if_else(final_score_pre < 0, 0, final_score_pre)
+  ) %>%
+  select(
+    hour, final_score, MMD
+  ) %>% 
+  mutate_if(is.numeric,
+            round,
+            digits = 1)
+
+view(mmd_ft_history12_month_finalscore)
+view(mmd_ft_history12_day_finalscore)
+view(mmd_ft_history12_hour_finalscore)
+
+#####################################
+
+# 2. Create Graphs
+
+# A. Create Customized Theme
+hc_theme_example = 
+  hc_theme_merge(
+    hc_theme_google(),
+    hc_theme(
+      colors = c(
+        "#0C6A4D", # Dark Green
+        "#80BA42", # Light Green
+        "#0C2340", # Navy
+        "#C8102E", # Red
+        "#85714D" # Gold
+      ),
+      chart = list(
+        backgroundColor = "#FFFFFF",
+        style = list(
+          fontFamily = "Calibre"
+        )
+      ),
+      title = list(
+        color = "#333333",
+        fontFamily = "Calibre"
+      ),
+      subtitle = list(
+        color = "#666666",
+        fontFamily = "Calibre"
+      ),
+      plotOptions = list(
+        line = list(marker = list(symbol = "circle", lineWidth = 2, radius = 5))
+      )
+    )
+  )
+
+# B. Create graphs
+# 1) Month
+mmd_ft_history12_month_finalscore %>%
+  hchart(.,
+         type = "bar",
+         hcaes(x = month,
+               y = final_score,
+               group = MMD
+         )) %>%
+  hc_yAxis(
+    opposite = FALSE,
+    labels = list(format = "{value}")
+  ) %>%
+  hc_xAxis(
+    opposite = FALSE,
+    labels = list(format = "{value}")
+  ) %>%
+  hc_title(
+    text = "Monthly Foot Traffic"
+  ) %>%
+  hc_add_theme(hc_theme_example) %>%
+  hc_size(width=800,height=500)
+
+# 2) Day
+mmd_ft_history12_day_finalscore %>%
+  hchart(.,
+         type = "bar",
+         hcaes(x = day.of.week,
+               y = final_score,
+               group = MMD
+         )) %>%
+  hc_yAxis(
+    opposite = FALSE,
+    labels = list(format = "{value}")
+  ) %>%
+  hc_xAxis(
+    opposite = FALSE,
+    labels = list(format = "{value}")
+  ) %>%
+  hc_title(
+    text = "Foot Traffic by Day of Week"
+  ) %>%
+  hc_add_theme(hc_theme_example) %>%
+  hc_size(width=800,height=500)
+
+# 3) Hour
+mmd_ft_history12_hour_finalscore %>%
+  hchart(.,
+         type = "line",
+         hcaes(x = hour,
+               y = final_score,
+               group = MMD
+         )) %>%
+  hc_yAxis(
+    opposite = FALSE,
+    labels = list(format = "{value}")
+  ) %>%
+  hc_xAxis(
+    opposite = FALSE,
+    labels = list(format = "{value}")
+  ) %>%
+  hc_title(
+    text = "Hourly Foot Traffic"
+  ) %>%
+  hc_add_theme(hc_theme_example) %>%
+  hc_size(width=800,height=500)
+
+
+
+################################################################################
 
 # 0. Import Excel file
 mmd_ft_1 <- read_excel("AEO_UWS_ColumbusAve-MMDResults-20220627170015.xlsx", sheet = "Ft Per Hour")
@@ -70,7 +456,6 @@ mmd_ft_2 <- read_excel("AEO_UWS_ColumbusCircle-MMDResults-20220627160037.xlsx", 
 #view(mmd_ft_1)
 #view(mmd_ft_2)
 
-################################################################################
 
 # 1. Foot Traffic per Hour
 
@@ -307,260 +692,6 @@ mmd_ft_day_index %>%
 
 ################################################################################
 ################################################################################
-################################################################################
-
-mmd_ft_history1 <- read_excel("AEO_UWS_ColumbusAve-MMDResults-20220627170015.xlsx", sheet = "FT Historical Trends")
-mmd_ft_history2 <- read_excel("AEO_UWS_ColumbusCircle-MMDResults-20220627160037.xlsx", sheet = "FT Historical Trends")
-
-view(mmd_ft_history)
-colnames(mmd_ft_history)
-
-mmd_ft_history1_month <-
-mmd_ft_history1 %>%
-  select(Date, Hour, Count) %>%
-  mutate(
-    date_onset = as.Date(Date),
-    year = year(date_onset),
-    month = month(date_onset),
-    day = mday(date_onset),
-    day.of.week = wday(date_onset, label = TRUE)
-  ) %>%
-  filter(
-    Date >= "2019-01-01" & Date <= "2019-12-31"
-  ) %>%
-  select(date_onset, year, month, day, day.of.week, Hour, Count) %>%
-  dplyr::rename(
-    hour = "Hour",
-    count = "Count"
-  ) %>%
-  group_by(month) %>%
-  summarise(m.count = sum(count)) %>%
-  mutate(
-    MMD = "MMD_1"
-  )
-
-mmd_ft_history1_day <-
-mmd_ft_history1 %>%
-  select(Date, Hour, Count) %>%
-  mutate(
-    date_onset = as.Date(Date),
-    year = year(date_onset),
-    month = month(date_onset),
-    day = mday(date_onset),
-    day.of.week = wday(date_onset, label = TRUE)
-  ) %>%
-  filter(
-    Date >= "2019-01-01" & Date <= "2019-12-31"
-  ) %>%
-  select(date_onset, year, month, day, day.of.week, Hour, Count) %>%
-  dplyr::rename(
-    hour = "Hour",
-    count = "Count"
-  ) %>%
-  group_by(day.of.week) %>%
-  summarise(d.count = sum(count)) %>%
-  mutate(
-    MMD = "MMD_1"
-  )
-
-mmd_ft_history1_hour <-
-mmd_ft_history1 %>%
-  select(Date, Hour, Count) %>%
-  mutate(
-    date_onset = as.Date(Date),
-    year = year(date_onset),
-    month = month(date_onset),
-    day = mday(date_onset),
-    day.of.week = wday(date_onset, label = TRUE)
-  ) %>%
-  filter(
-    Date >= "2019-01-01" & Date <= "2019-12-31"
-  ) %>%
-  select(date_onset, year, month, day, day.of.week, Hour, Count) %>%
-  dplyr::rename(
-    hour = "Hour",
-    count = "Count"
-  ) %>%
-  group_by(hour) %>%
-  summarise(h.count = sum(count)) %>%
-  mutate(
-    MMD = "MMD_1"
-  )
-  
-
-mmd_ft_history2_month <-
-  mmd_ft_history2 %>%
-  select(Date, Hour, Count) %>%
-  mutate(
-    date_onset = as.Date(Date),
-    year = year(date_onset),
-    month = month(date_onset),
-    day = mday(date_onset),
-    day.of.week = wday(date_onset, label = TRUE)
-  ) %>%
-  filter(
-    Date >= "2019-01-01" & Date <= "2019-12-31"
-  ) %>%
-  select(date_onset, year, month, day, day.of.week, Hour, Count) %>%
-  dplyr::rename(
-    hour = "Hour",
-    count = "Count"
-  ) %>%
-  group_by(month) %>%
-  summarise(m.count = sum(count)) %>%
-  mutate(
-    MMD = "MMD_2"
-  )
-
-mmd_ft_history2_day <-
-  mmd_ft_history2 %>%
-  select(Date, Hour, Count) %>%
-  mutate(
-    date_onset = as.Date(Date),
-    year = year(date_onset),
-    month = month(date_onset),
-    day = mday(date_onset),
-    day.of.week = wday(date_onset, label = TRUE)
-  ) %>%
-  filter(
-    Date >= "2019-01-01" & Date <= "2019-12-31"
-  ) %>%
-  select(date_onset, year, month, day, day.of.week, Hour, Count) %>%
-  dplyr::rename(
-    hour = "Hour",
-    count = "Count"
-  ) %>%
-  group_by(day.of.week) %>%
-  summarise(d.count = sum(count)) %>%
-  mutate(
-    MMD = "MMD_2"
-  )
-
-mmd_ft_history2_hour <-
-mmd_ft_history2 %>%
-  select(Date, Hour, Count) %>%
-  mutate(
-    date_onset = as.Date(Date),
-    year = year(date_onset),
-    month = month(date_onset),
-    day = mday(date_onset),
-    day.of.week = wday(date_onset, label = TRUE)
-  ) %>%
-  filter(
-    Date >= "2019-01-01" & Date <= "2019-12-31"
-  ) %>%
-  select(date_onset, year, month, day, day.of.week, Hour, Count) %>%
-  dplyr::rename(
-    hour = "Hour",
-    count = "Count"
-  ) %>%
-  group_by(hour) %>%
-  summarise(h.count = sum(count)) %>%
-  mutate(
-    MMD = "MMD_2"
-  )
-
-
-
-mmd_ft_history12_month <-
-mmd_ft_history1_month %>%
-  rbind(mmd_ft_history2_month)
-
-mmd_ft_history12_day <-
-mmd_ft_history1_day %>%
-  rbind(mmd_ft_history2_day)
-
-mmd_ft_history12_hour <-
-mmd_ft_history1_hour %>%
-  rbind(mmd_ft_history2_hour)
-
-view(mmd_ft_history12_month)
-view(mmd_ft_history12_day)
-view(mmd_ft_history12_hour)
-
-
-
-
-
-head(mmd_ft_history12_month)
-
-mmd_ft_history12_month %>%
-mutate(
-  mean_month = mean(m.count),
-  stdv_month = sd(m.count),
-  var1_weight = 1,
-  Var1_Z = (m.count-mean_month)/stdv_month,
-  Var1_cappped = if_else(Var1_Z > 3, 3, 
-                         if_else(Var1_Z < -3, -3, Var1_Z)),
-  com_z = var1_weight*Var1_cappped,
-  max_z = max(com_z),
-  demand_index = (1+(com_z/max_z))*100,
-  index_adj = mean(demand_index),
-  final_score_pre = demand_index/index_adj*100,
-  final_score = if_else(final_score_pre < 0, 0, final_score_pre)
-) %>%
-  select(
-    month, final_score, MMD
-  ) %>% 
-  mutate_if(is.numeric,
-            round,
-            digits = 1)
-
-
-
-hc_theme_example = 
-  hc_theme_merge(
-    hc_theme_google(),
-    hc_theme(
-      colors = c(
-        "#0C6A4D", # Dark Green
-        "#80BA42", # Light Green
-        "#0C2340", # Navy
-        "#C8102E", # Red
-        "#85714D" # Gold
-      ),
-      chart = list(
-        backgroundColor = "#FFFFFF",
-        style = list(
-          fontFamily = "Calibre"
-        )
-      ),
-      title = list(
-        color = "#333333",
-        fontFamily = "Calibre"
-      ),
-      subtitle = list(
-        color = "#666666",
-        fontFamily = "Calibre"
-      ),
-      plotOptions = list(
-        line = list(marker = list(symbol = "circle", lineWidth = 2, radius = 5))
-      )
-    )
-  )
-
-mmd_ft_hour_index %>%
-  hchart(.,
-         type = "line",
-         hcaes(x = Hour,
-               y = final_score,
-               group = Project.Name
-         )) %>%
-  hc_yAxis(
-    opposite = FALSE,
-    labels = list(format = "{value}")
-  ) %>%
-  hc_xAxis(
-    opposite = FALSE,
-    labels = list(format = "{value}")
-  ) %>%
-  hc_title(
-    text = "Foot Traffic per Hour"
-  ) %>%
-  hc_add_theme(hc_theme_example) %>%
-  hc_size(width=800,height=500)
-
-
 
 
 
