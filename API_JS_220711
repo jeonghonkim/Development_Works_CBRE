@@ -1,0 +1,86 @@
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>ArcGIS Developers Guide: Display a map (2D) - Hoon, 220711</title>
+  <style>
+    html,
+    body,
+    #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+  </style>
+
+  <link rel="stylesheet" href="https://js.arcgis.com/4.19/esri/themes/light/main.css">
+  <script src="https://js.arcgis.com/4.19/"></script>
+
+  <script>
+    require([
+     "esri/config",
+     "esri/Map",
+     "esri/views/MapView",
+     "esri/layers/FeatureLayer",
+     "esri/widgets/BasemapToggle",
+     "esri/widgets/BasemapGallery",
+     "esri/widgets/Legend"
+    ], function (esriConfig, Map, MapView, FeatureLayer, BasemapToggle, BasemapGallery, Legend) {
+
+      const layer = new FeatureLayer({
+        title: "Office Location",
+        portalItem: {
+          id: "8402198cbe414f7dacb8e583cee9d4fc"
+        },
+        layerId: 1,
+        minScale: 0,
+        maxScale: 0,
+        opacity: 0,
+        outFields: ["trade_area", "status", "property_name"]
+      });
+      
+      esriConfig.apiKey = "AAPK125deee9852a4928bcc7df2ba3a51d18oi2Yc5o-j52aSjxGLNd7eucJk0wyzqKwLKk3w0p9KSfNeL93MLoODlR-DqaEqKz6";
+      const map = new Map({
+        basemap: "dark-gray-vector", // Basemap layer
+        layers: [ layer ]
+      });
+
+      const view = new MapView({
+        map: map,
+        center: [-73.983, 40.753],
+        zoom: 11, // scale: 72223.819286
+        container: "viewDiv",
+        constraints: {
+          snapToZoom: false
+        }
+      });
+      
+      const basemapToggle = new BasemapToggle({
+        view: view,
+        nextBasemap: "arcgis-imagery"
+      });
+      
+      view.ui.add(basemapToggle, "bottom-right");
+      
+      const basemapGallery = new BasemapGallery({
+        view: view,
+        source: {
+          query: {
+            title: 'World Basemaps for Developers'
+          }
+        }
+      });
+      
+      view.ui.add(basemapGallery, "top-right");
+      
+    });
+  </script>
+</head>
+
+<body>
+  <div id="viewDiv"></div>
+</body>
+
+</html>
