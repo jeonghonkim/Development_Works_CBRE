@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>CodePen - API for JS - Custom Basemap / Add Feature / Display Pop-up 220712</title>
+  
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>ArcGIS Developers Guide: Display a Custom Base map & Add Feature Layers - Hoon, 220712</title>
+  <style>
+    html,
+    body,
+    #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+  </style>
+
+  <link rel="stylesheet" href="https://js.arcgis.com/4.19/esri/themes/light/main.css">
+  <script src="https://js.arcgis.com/4.19/"></script>
+
+  <script>
+    require([
+     "esri/config",
+     "esri/Map",
+     "esri/views/MapView",
+     "esri/Basemap",
+     "esri/layers/FeatureLayer",
+     "esri/layers/VectorTileLayer",
+     "esri/layers/TileLayer",
+     "esri/widgets/BasemapToggle",
+     "esri/widgets/Legend"
+    ], function (esriConfig, Map, MapView, Basemap, FeatureLayer, VectorTileLayer, TileLayer, BasemapToggle, Legend) {
+
+      const layer = new FeatureLayer({
+        title: "Office Location",
+        portalItem: {
+          id: "8402198cbe414f7dacb8e583cee9d4fc"
+        },
+        layerId: 1,
+        minScale: 0,
+        maxScale: 0,
+        opacity: 0,
+        outFields: ["trade_area", "status", "property_name"]
+      });
+
+      esriConfig.apiKey = "AAPK125deee9852a4928bcc7df2ba3a51d18oi2Yc5o-j52aSjxGLNd7eucJk0wyzqKwLKk3w0p9KSfNeL93MLoODlR-DqaEqKz6";
+      
+      const vectorTileLayer = new VectorTileLayer({
+        portalItem: {
+          id: "85ccba74820647b1af970b2c4c1f4059"
+        }
+      }); 
+      
+      const basemap = new Basemap({
+        baseLayers: vectorTileLayer
+      });
+      
+      const map = new Map({
+        basemap: basemap,
+      });
+      
+      const view = new MapView({
+        container: "viewDiv",
+        map: map,
+        center: [-73.983, 40.753], //,-76.079 36.849 - Manhattan New York
+        zoom: 13 
+      });
+      
+      const popupSubway = {
+        "title": "NYC Subway",
+        "content": "<b>Line Name:</b> {Line}<br><b>Line Route:</b> {route_id}"
+      }
+      
+      const NYCsubwayLayer = new FeatureLayer({
+        url: "https://services1.arcgis.com/md59oHQp31WBN4km/arcgis/rest/services/Subway_Lines/FeatureServer/0",
+        outFields: ["FID", "Division", "Line", "route_id"],
+        popupTemplate: popupSubway
+      });
+      map.add(NYCsubwayLayer, 0);
+      
+      const NYCsubstationLayer = new FeatureLayer ({
+        url: "https://services1.arcgis.com/md59oHQp31WBN4km/ArcGIS/rest/services/Subway_Stations2/FeatureServer/0",
+      });
+      map.add(NYCsubstationLayer, 1)
+      
+      const basemapToggle = new BasemapToggle({
+        view: view,
+        nextBasemap: "arcgis-imagery"
+      });
+      
+      view.ui.add(basemapToggle, "bottom-right");
+      
+    });
+  </script>
+</head>
+
+<body>
+  <div id="viewDiv"></div>
+</body>
+</html>
+<!-- partial -->
+  
+</body>
+</html>
